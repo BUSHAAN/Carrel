@@ -19,7 +19,11 @@ export function createAuth(config: AppConfig) {
     secret: config.betterAuthSecret,
     database,
     disabledPaths: ["/token"],
-    trustedOrigins: [config.betterAuthUrl, "http://127.0.0.1", "http://localhost"],
+    trustedOrigins: [
+      config.betterAuthUrl,
+      `http://127.0.0.1:${config.httpPort}`,
+      `http://localhost:${config.httpPort}`,
+    ],
     emailAndPassword: {
       enabled: true,
       disableSignUp: true,

@@ -12,12 +12,14 @@
     "start": "node dist/index.js",
     "start:stdio": "node dist/index.js --stdio",
     "start:http": "node dist/index.js --http",
-    "dev": "tsx src/index.ts",
-    "dev:http": "tsx src/index.ts --http",
-    "auth:migrate": "npx @better-auth/cli@latest migrate --config src/auth.ts --yes",
+    "dev": "tsx watch src/index.ts --http",
+    "dev:http": "tsx watch src/index.ts --http",
+    "dev:stdio": "tsx src/index.ts --stdio",
+    "auth:migrate": "pnpm dlx @better-auth/cli@latest migrate --config src/auth.ts --yes",
     "test": "vitest run",
     "test:watch": "vitest"
   },
+  "packageManager": "pnpm@12.6.0",
   "engines": {
     "node": ">=22.5.0"
   },

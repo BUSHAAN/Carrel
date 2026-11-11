@@ -1,0 +1,8 @@
+nodeLinker: hoisted
+packageImportMethod: copy
+symlink: false
+minimumReleaseAge: 0
+onlyBuiltDependencies:
+  - esbuild
+allowBuilds:
+  esbuild: true
