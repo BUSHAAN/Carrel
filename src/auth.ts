@@ -69,5 +69,18 @@ export async function seedOwner(auth: Auth, config: AppConfig): Promise<void> {
   console.error(`Seeded owner user ${config.ownerEmail}`);
 }
 
-/** CLI (`auth migrate`) loads this export. */
-export const auth = createAuth(loadConfig());
+let cliAuthInstance: Auth | undefined;
+
+function cliAuth(): Auth {
+  cliAuthInstance ??= createAuth(loadConfig());
+  return cliAuthInstance;
+}
+
+/** CLI (`auth migrate`) loads this export. Lazily created so tests can import helpers without touching the default DB. */
+export const auth: Auth = new Proxy({} as Auth, {
+  get(_target, property, receiver) {
+    const instance = cliAuth();
+    const value = Reflect.get(instance, property, receiver);
+    return typeof value === "function" ? value.bind(instance) : value;
+  },
+});
