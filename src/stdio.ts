@@ -1,6 +1,10 @@
+import { serveStdio } from "@modelcontextprotocol/server/stdio";
 import type { AppConfig } from "./config.js";
+import { KnowledgeStore } from "./knowledge/store.js";
+import { buildServer } from "./server.js";
 
-/** Wired in Phase 3. */
-export async function startStdio(_config: AppConfig): Promise<void> {
-  throw new Error("stdio MCP transport is not implemented yet (Phase 3)");
+export async function startStdio(config: AppConfig): Promise<void> {
+  const store = new KnowledgeStore(config.knowledgeRoot);
+  await serveStdio(() => buildServer(store));
+  console.error("study-mcp listening on stdio");
 }
