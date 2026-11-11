@@ -1,7 +1,8 @@
 import { existsSync, mkdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { atomicWriteFile } from "../knowledge/fs.js";
 import { KnowledgeError } from "../knowledge/errors.js";
+import { atomicWriteFile } from "../knowledge/fs.js";
+import { metaDir } from "../knowledge/meta-dir.js";
 
 export const TOPIC_STATUSES = ["not_started", "learning", "understood", "mastered"] as const;
 export type TopicStatus = (typeof TOPIC_STATUSES)[number];
@@ -41,7 +42,7 @@ export type StudyState = {
 const EMPTY: StudyState = { subjects: [], revisionQueue: [], sessions: [] };
 
 export function statePath(root: string): string {
-  return join(root, ".study-mcp", "study-progress.json");
+  return join(metaDir(root), "study-progress.json");
 }
 
 export function loadStudyState(root: string): StudyState {
@@ -58,7 +59,7 @@ export function loadStudyState(root: string): StudyState {
 }
 
 export function saveStudyState(root: string, state: StudyState): void {
-  mkdirSync(join(root, ".study-mcp"), { recursive: true });
+  mkdirSync(metaDir(root), { recursive: true });
   atomicWriteFile(statePath(root), `${JSON.stringify(state, null, 2)}\n`);
 }
 

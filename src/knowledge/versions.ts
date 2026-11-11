@@ -2,14 +2,14 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync } fr
 import { join } from "node:path";
 import { KnowledgeError } from "./errors.js";
 import { atomicWriteFile, readNote } from "./fs.js";
+import { metaDir } from "./meta-dir.js";
 import { assertMarkdownNote, resolveInsideRoot, toSafeRelative } from "./paths.js";
 
-const META = ".study-mcp";
 const MAX_VERSIONS = 50;
 
 function versionsDir(root: string, notePath: string): string {
   const safe = toSafeRelative(root, notePath).replaceAll("/", "__");
-  return join(root, META, "versions", safe);
+  return join(metaDir(root), "versions", safe);
 }
 
 function stamp(): string {

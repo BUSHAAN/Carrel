@@ -21,7 +21,7 @@ function wrap<T>(fn: () => Promise<T> | T) {
         : error instanceof Error
           ? error.message
           : String(error);
-      console.error(`[study-mcp] tool error: ${message}`);
+      console.error(`[carrel] tool error: ${message}`);
       return textResult(message, true);
     }
   };

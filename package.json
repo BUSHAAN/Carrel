@@ -1,11 +1,11 @@
 {
-  "name": "study-with-ai",
+  "name": "carrel",
   "version": "1.0.0",
-  "description": "Model-agnostic MCP server for a personal Markdown study knowledge base",
+  "description": "Carrel — a quiet place for your knowledge to grow. MCP study notes over stdio and Streamable HTTP.",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "study-mcp": "dist/index.js"
+    "carrel": "dist/index.js"
   },
   "scripts": {
     "build": "tsc",

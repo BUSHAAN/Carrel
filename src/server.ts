@@ -4,7 +4,7 @@ import { STUDY_POLICY, registerAllTools } from "./tools/register.js";
 
 export function buildServer(store: KnowledgeStore): McpServer {
   const server = new McpServer({
-    name: "study-with-ai",
+    name: "carrel",
     version: "1.0.0",
     description: STUDY_POLICY,
   });

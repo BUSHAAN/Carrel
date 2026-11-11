@@ -18,7 +18,7 @@ async function main(): Promise<void> {
   loadDotEnv();
   const mode = parseMode();
   const config = loadConfig();
-  console.error(`study-mcp starting (${mode}); knowledge root: ${config.knowledgeRoot}`);
+  console.error(`carrel starting (${mode}); knowledge root: ${config.knowledgeRoot}`);
 
   if (mode === "stdio") {
     const { startStdio } = await import("./stdio.js");

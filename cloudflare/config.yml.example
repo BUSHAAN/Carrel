@@ -1,5 +1,5 @@
 # Optional if you use cloudflared locally instead of the Zero Trust published-app UI.
-# Public hostname: mcp.bushaan.dev
+# Public hostname: mcp.example.com
 # Local service: the HTTP MCP server (pnpm dev) on 127.0.0.1:8787
 # Leave Path empty so /mcp, /api/auth, /.well-known, /sign-in, and /consent all match.
 
@@ -7,6 +7,6 @@ tunnel: YOUR_TUNNEL_ID
 credentials-file: /path/to/YOUR_TUNNEL_ID.json
 
 ingress:
-  - hostname: mcp.bushaan.dev
+  - hostname: mcp.example.com
     service: http://127.0.0.1:8787
   - service: http_status:404

@@ -6,5 +6,5 @@ import { buildServer } from "./server.js";
 export async function startStdio(config: AppConfig): Promise<void> {
   const store = new KnowledgeStore(config.knowledgeRoot);
   await serveStdio(() => buildServer(store));
-  console.error("study-mcp listening on stdio");
+  console.error("carrel listening on stdio");
 }

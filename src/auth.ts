@@ -14,7 +14,7 @@ export function createAuth(config: AppConfig) {
   const database = new DatabaseSync(config.sqlitePath);
 
   return betterAuth({
-    appName: "study-with-ai",
+    appName: "Carrel",
     baseURL: config.betterAuthUrl,
     secret: config.betterAuthSecret,
     database,

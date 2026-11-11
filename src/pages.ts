@@ -29,9 +29,9 @@ function layout(title: string, body: string): string {
 
 export function signInPage(): string {
   return layout(
-    "Sign in",
-    `<h1>study-with-ai</h1>
-     <p>Sign in to authorize an MCP client against your notes.</p>
+    "Sign in · Carrel",
+    `<h1>Carrel</h1>
+     <p>A quiet place for your knowledge to grow. Sign in to let an MCP client use your notes.</p>
      <form id="form">
        <label for="email">Email</label>
        <input id="email" name="email" type="email" autocomplete="username" required />

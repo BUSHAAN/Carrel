@@ -45,13 +45,19 @@ export function createHttpApp(config: AppConfig, auth: Auth, store: KnowledgeSto
   });
 
   app.get("/", (c) =>
-    c.text("study-mcp HTTP. Use POST /mcp (OAuth) or connect over stdio."),
+    c.text("Carrel HTTP. POST /mcp (OAuth) or connect over stdio."),
   );
 
   return { app };
 }
 
 export async function startHttp(config: AppConfig): Promise<void> {
+  if (config.betterAuthSecret.length < 32 || config.betterAuthSecret === "dev-only-change-me") {
+    throw new Error("Set BETTER_AUTH_SECRET to a long random value before serving HTTP.");
+  }
+  if (config.ownerPassword === "changeme-change-me") {
+    throw new Error("Set OWNER_PASSWORD before serving HTTP.");
+  }
   const auth = createAuth(config);
   await migrateAuth(auth);
   await seedOwner(auth, config);
@@ -59,7 +65,7 @@ export async function startHttp(config: AppConfig): Promise<void> {
   const { app } = createHttpApp(config, auth, store);
 
   serve({ fetch: app.fetch, port: config.httpPort, hostname: "127.0.0.1" }, () => {
-    console.error(`study-mcp HTTP on http://127.0.0.1:${config.httpPort}/mcp`);
+    console.error(`carrel HTTP on http://127.0.0.1:${config.httpPort}/mcp`);
     console.error(`Better Auth origin: ${config.betterAuthUrl}`);
   });
 }
