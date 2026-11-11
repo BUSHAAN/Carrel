@@ -1,0 +1,11 @@
+# Copy to ~/.cloudflared/config.yml (or run: cloudflared tunnel create study-mcp)
+# The tunnel should forward the public hostname to the local HTTP server.
+# Required public paths: /mcp, /api/auth/*, /.well-known/*, /sign-in, /consent
+
+tunnel: YOUR_TUNNEL_ID
+credentials-file: /path/to/YOUR_TUNNEL_ID.json
+
+ingress:
+  - hostname: notes.example.com
+    service: http://127.0.0.1:8787
+  - service: http_status:404
