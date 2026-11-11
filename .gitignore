@@ -2,6 +2,8 @@ node_modules/
 dist/
 data/
 .env
+knowledge/**
+!knowledge/.gitignore
 *.sqlite
 *.sqlite-journal
 coverage/

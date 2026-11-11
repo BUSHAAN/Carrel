@@ -9,19 +9,20 @@ Teach first; write notes only when you ask. Notes stay ordinary Markdown (Obsidi
 ## Setup
 
 ```bash
-npm install
+pnpm install
 cp .env.example .env
 # set BETTER_AUTH_SECRET, OWNER_EMAIL, OWNER_PASSWORD
-# for local HTTP, BETTER_AUTH_URL=http://127.0.0.1:8787 and MCP_RESOURCE=http://127.0.0.1:8787/mcp
-npm run build
+pnpm build
 ```
 
-Optional: `git init` inside `knowledge/` so accidental edits are reversible.
+`pnpm dev` starts the HTTP server with reload on `http://127.0.0.1:8787` (the address Cloudflare must target). `pnpm dev:stdio` is local Cursor/Claude only.
+
+Notes live in `knowledge/` on your machine. That directory is in the repo so the server has a place to write; its contents are gitignored. Optional: `git init` inside `knowledge/` if you want local history without putting notes on this remote.
 
 ## Local stdio (Cursor / Claude Desktop)
 
 ```bash
-npm run start:stdio
+pnpm start:stdio
 ```
 
 Cursor `mcp.json`:
@@ -45,20 +46,24 @@ Claude Desktop uses the same command/env shape in its config file.
 ## Remote HTTP + OAuth
 
 ```bash
-npm run start:http
+pnpm dev
 ```
 
-Listen address is `127.0.0.1` only. Put Cloudflare Tunnel in front (see [cloudflare/config.yml.example](cloudflare/config.yml.example)).
+Listen address is `127.0.0.1:8787`. In Cloudflare Zero Trust → published application:
 
-The tunnel hostname must match `BETTER_AUTH_URL`. Forward:
+| Field | Value |
+| --- | --- |
+| Subdomain | `mcp` |
+| Domain | `bushaan.dev` |
+| Full hostname | `mcp.bushaan.dev` |
+| Path | leave empty |
+| Service URL | `http://127.0.0.1:8787` |
 
-- `POST /mcp`
-- `/api/auth/*`
-- `/.well-known/*`
-- `/sign-in`
-- `/consent`
+Do not use port 80, and do not set Path to `/mcp`. OAuth needs `/sign-in`, `/consent`, `/api/auth/*`, and `/.well-known/*` on the same hostname. MCP clients connect to `https://mcp.bushaan.dev/mcp`.
 
-MCP clients use `https://<your-domain>/mcp`. Unauthenticated calls return 401 with `WWW-Authenticate`. Sign in as the seeded owner, then consent. Sign-up is disabled.
+Unauthenticated `POST /mcp` returns 401 with `WWW-Authenticate`. Sign in as the seeded owner, then consent. Sign-up is disabled.
+
+See [cloudflare/config.yml.example](cloudflare/config.yml.example) if you use `cloudflared` instead of the dashboard UI.
 
 ## Tools
 
@@ -80,5 +85,5 @@ MCP clients use `https://<your-domain>/mcp`. Unauthenticated calls return 401 wi
 ## Tests
 
 ```bash
-npm test
+pnpm test
 ```
