@@ -4,21 +4,25 @@ import { TOPIC_STATUSES, addRevisionItem, getRevisionQueue, getStudyProgress, re
 import { KnowledgeError } from "./errors.js";
 import {
   appendToNote,
+  copyNote,
   createFolder,
   createNote,
+  deleteFolder,
   deleteNote,
   ensureKnowledgeRoot,
   listFiles,
   listFolders,
   moveNote,
   readNote,
+  renameFolder,
+  walkMarkdownFiles,
   updateNote,
   updateSection,
 } from "./fs.js";
-import { getBacklinks, validateLinks } from "./links.js";
+import { getBacklinks, rewriteLinksAfterMove, validateLinks } from "./links.js";
 import { getNoteMetadata, getNoteOutline, getRecentChanges, getVaultOverview } from "./overview.js";
 export type { TreeNode } from "./overview.js";
-import { resolveInsideRoot } from "./paths.js";
+import { resolveInsideRoot, toSafeRelative } from "./paths.js";
 import { readSection } from "./sections.js";
 import { buildSearchIndex, searchNotes, type SearchHit } from "./search.js";
 import { getStudyIndex, type SubjectIndex } from "./study-index.js";
@@ -86,8 +90,37 @@ export class KnowledgeStore {
     this.refresh();
   }
 
+  async copyNote(from: string, to: string) {
+    await copyNote(this.root, from, to);
+    this.refresh();
+    return { ok: true, from, to };
+  }
+
   createFolder(path: string) {
     createFolder(this.root, path);
+  }
+
+  async deleteFolder(path: string, confirm: boolean, recursive = false) {
+    if (confirm) {
+      for (const note of walkMarkdownFiles(this.root, path)) {
+        await this.snapshot(note.path, "delete_folder");
+      }
+    }
+    await deleteFolder(this.root, path, confirm, recursive);
+    this.refresh();
+    return { ok: true, path, recursive };
+  }
+
+  async renameFolder(from: string, to: string) {
+    const source = toSafeRelative(this.root, from);
+    const dest = toSafeRelative(this.root, to);
+    for (const note of walkMarkdownFiles(this.root, source)) {
+      await this.snapshot(note.path, "rename_folder");
+    }
+    await renameFolder(this.root, source, dest);
+    const rewritten = await rewriteLinksAfterMove(this.root, source, dest);
+    this.refresh();
+    return { ok: true, from: source, to: dest, linksRewritten: rewritten };
   }
 
   async deleteNote(path: string, confirm: boolean) {

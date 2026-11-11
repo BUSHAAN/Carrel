@@ -193,6 +193,16 @@ export function registerFilesystemTools(server: McpServer, store: KnowledgeStore
   );
 
   server.registerTool(
+    "copy_note",
+    {
+      title: "Copy note",
+      description: "Duplicate a note. Useful for templates and revision sheets. Fails if the destination exists.",
+      inputSchema: z.object({ from: z.string(), to: z.string() }),
+    },
+    async ({ from, to }) => wrap(() => store.copyNote(from, to))(),
+  );
+
+  server.registerTool(
     "create_folder",
     {
       title: "Create folder",
@@ -218,6 +228,31 @@ export function registerFilesystemTools(server: McpServer, store: KnowledgeStore
         await store.deleteNote(path, confirm);
         return { ok: true, path };
       })(),
+  );
+
+  server.registerTool(
+    "delete_folder",
+    {
+      title: "Delete folder",
+      description:
+        "Delete a folder. confirm=true is required. Without recursive=true the folder must be empty. Recursive delete snapshots notes first.",
+      inputSchema: z.object({
+        path: z.string(),
+        confirm: z.boolean(),
+        recursive: z.boolean().optional(),
+      }),
+    },
+    async ({ path, confirm, recursive }) => wrap(() => store.deleteFolder(path, confirm, recursive ?? false))(),
+  );
+
+  server.registerTool(
+    "rename_folder",
+    {
+      title: "Rename folder",
+      description: "Rename or move a folder and rewrite internal Markdown links that pointed at notes inside it.",
+      inputSchema: z.object({ from: z.string(), to: z.string() }),
+    },
+    async ({ from, to }) => wrap(() => store.renameFolder(from, to))(),
   );
 
   server.registerTool(

@@ -129,6 +129,58 @@ export async function moveNote(root: string, from: string, to: string): Promise<
   await rename(source, dest);
 }
 
+export async function copyNote(root: string, from: string, to: string): Promise<void> {
+  const content = await readNote(root, from);
+  await createNote(root, to, content);
+}
+
+export async function deleteFolder(root: string, relativePath: string, confirm: boolean, recursive = false): Promise<void> {
+  const safe = assertSafeRelative(root, relativePath);
+  if (safe === "") {
+    throw new KnowledgeError("INVALID_PATH", "Cannot delete the knowledge root");
+  }
+  if (!confirm) {
+    throw new KnowledgeError(
+      "CONFIRM_REQUIRED",
+      `Deletion not confirmed. Call delete_folder with confirm=true and path="${safe}"${recursive ? " and recursive=true" : ""}`,
+    );
+  }
+  const absolute = resolveInsideRoot(root, safe);
+  if (!existsSync(absolute) || !statSync(absolute).isDirectory()) {
+    throw new KnowledgeError("NOT_FOUND", `Folder not found: ${safe}`);
+  }
+  const notes = walkMarkdownFiles(root, safe);
+  const childDirs = listFolders(root, safe);
+  if (!recursive && (notes.length > 0 || childDirs.length > 0)) {
+    throw new KnowledgeError(
+      "NOT_EMPTY",
+      `Folder is not empty (${notes.length} notes, ${childDirs.length} subfolders). Pass recursive=true and confirm=true to delete it.`,
+    );
+  }
+  await rm(absolute, { recursive: true, force: true });
+}
+
+export async function renameFolder(root: string, from: string, to: string): Promise<void> {
+  const sourceRel = assertSafeRelative(root, from);
+  const destRel = assertSafeRelative(root, to);
+  if (sourceRel === "" || destRel === "") {
+    throw new KnowledgeError("INVALID_PATH", "Cannot rename the knowledge root");
+  }
+  if (destRel === sourceRel || destRel.startsWith(`${sourceRel}/`)) {
+    throw new KnowledgeError("INVALID_PATH", "Destination cannot be inside the source folder");
+  }
+  const source = resolveInsideRoot(root, sourceRel);
+  const dest = resolveInsideRoot(root, destRel);
+  if (!existsSync(source) || !statSync(source).isDirectory()) {
+    throw new KnowledgeError("NOT_FOUND", `Folder not found: ${sourceRel}`);
+  }
+  if (existsSync(dest)) {
+    throw new KnowledgeError("ALREADY_EXISTS", `Destination already exists: ${destRel}`);
+  }
+  mkdirSync(dirname(dest), { recursive: true });
+  await rename(source, dest);
+}
+
 export async function deleteNote(root: string, relativePath: string, confirm: boolean): Promise<void> {
   assertMarkdownNote(root, relativePath);
   if (!confirm) {

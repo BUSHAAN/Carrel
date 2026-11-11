@@ -45,6 +45,21 @@ describe("workflow tools", () => {
     expect(broken.some((link) => link.resolved.includes("nope"))).toBe(true);
   });
 
+  it("copies notes, refuses non-empty folder delete, and renames with link repair", async () => {
+    const store = tempStore();
+    await store.createNote("OS/Scheduling.md", "# Scheduling\n");
+    await store.createNote("index.md", "[OS](./OS/Scheduling.md)\n");
+    await store.copyNote("OS/Scheduling.md", "OS/Scheduling copy.md");
+    expect(await store.readNote("OS/Scheduling copy.md")).toContain("Scheduling");
+    await expect(store.deleteFolder("OS", true, false)).rejects.toMatchObject({ code: "NOT_EMPTY" });
+    const renamed = await store.renameFolder("OS", "Operating Systems");
+    expect(renamed.ok).toBe(true);
+    const index = await store.readNote("index.md");
+    expect(index).toContain("Operating%20Systems/Scheduling.md");
+    await store.deleteFolder("Operating Systems", true, true);
+    await expect(store.readNote("Operating Systems/Scheduling.md")).rejects.toMatchObject({ code: "NOT_FOUND" });
+  });
+
   it("tracks study progress and revision", () => {
     const store = tempStore();
     store.updateTopicStatus("Operating Systems", "Scheduling", "learning");
