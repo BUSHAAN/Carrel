@@ -17,6 +17,7 @@ function wrap<T>(fn: () => Promise<T> | T) {
       return textResult(await fn());
     } catch (error) {
       const message = isKnowledgeError(error) ? `${error.code}: ${error.message}` : error instanceof Error ? error.message : String(error);
+      console.error(`[study-mcp] tool error: ${message}`);
       return textResult(message, true);
     }
   };
@@ -33,9 +34,13 @@ export function buildServer(store: KnowledgeStore): McpServer {
     "list_folders",
     {
       title: "List folders",
-      description: "Explore subject/topic folders in the knowledge base. Omit path to list the root.",
+      description:
+        "Explore subject/topic folders in the knowledge base. Omit path to list the knowledge root. Do not pass the git workspace path; use names like HPC.",
       inputSchema: z.object({
-        path: z.string().optional().describe("Folder path relative to the knowledge root"),
+        path: z
+          .string()
+          .optional()
+          .describe("Optional folder relative to the knowledge root (e.g. HPC). Omit to list the root."),
       }),
     },
     async ({ path }) => wrap(() => store.listFolders(path))(),
@@ -203,7 +208,8 @@ export function buildServer(store: KnowledgeStore): McpServer {
     "get_study_index",
     {
       title: "Study index",
-      description: "Overview of subjects, README topics, and note links. Call this at the start of a study session instead of reading every file.",
+      description:
+        "Overview of subjects, README topics, and note links. Call with no path (or omit path) at the start of a session. Do not pass the git project path.",
       inputSchema: z.object({
         path: z.string().optional(),
       }),

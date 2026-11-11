@@ -14,14 +14,39 @@ export function normalizeRelative(input: string | undefined): string {
   return toPosix(input.trim()).replace(/^\/+/u, "");
 }
 
-export function assertSafeRelative(input: string): string {
-  const posix = normalizeRelative(input);
-  if (posix.includes("\0")) {
+function isInside(rootAbs: string, candidateAbs: string): boolean {
+  const rel = relative(rootAbs, candidateAbs);
+  return rel === "" || (!rel.startsWith("..") && !isAbsolute(rel));
+}
+
+/** Relative POSIX path inside the knowledge root. Accepts workspace/knowledge absolute paths. */
+export function toSafeRelative(root: string, input: string | undefined): string {
+  const rootAbs = resolve(root);
+  const trimmed = (input ?? "").trim();
+  if (trimmed === "" || trimmed === "." || trimmed === "/" || trimmed === "./") {
+    return "";
+  }
+  if (trimmed.includes("\0")) {
     throw new KnowledgeError("INVALID_PATH", "Path contains a null byte");
   }
-  if (isAbsolute(input) || WINDOWS_DRIVE.test(input) || posix.startsWith("//")) {
-    throw new KnowledgeError("INVALID_PATH", "Absolute paths are not allowed");
+
+  const looksAbsolute = isAbsolute(trimmed) || WINDOWS_DRIVE.test(trimmed) || trimmed.startsWith("//");
+  if (looksAbsolute) {
+    const abs = resolve(trimmed);
+    if (isInside(rootAbs, abs)) {
+      return toPosix(relative(rootAbs, abs));
+    }
+    const projectAbs = resolve(rootAbs, "..");
+    if (abs === projectAbs) {
+      return "";
+    }
+    throw new KnowledgeError(
+      "INVALID_PATH",
+      `Use a path inside the knowledge base (relative like "HPC"), not the git workspace. Knowledge root: ${rootAbs}`,
+    );
   }
+
+  const posix = toPosix(trimmed).replace(/^\/+/u, "");
   const segments = posix.split("/").filter((part) => part !== "" && part !== ".");
   if (segments.some((part) => part === "..")) {
     throw new KnowledgeError("INVALID_PATH", "Path traversal is not allowed");
@@ -29,15 +54,14 @@ export function assertSafeRelative(input: string): string {
   return segments.join("/");
 }
 
+export function assertSafeRelative(root: string, input: string): string {
+  return toSafeRelative(root, input);
+}
+
 export function resolveInsideRoot(root: string, relativePath: string): string {
-  const safe = assertSafeRelative(relativePath);
+  const safe = toSafeRelative(root, relativePath);
   const rootAbs = resolve(root);
-  const absolute = safe === "" ? rootAbs : resolve(rootAbs, ...safe.split("/"));
-  const rel = relative(rootAbs, absolute);
-  if (rel.startsWith("..") || isAbsolute(rel)) {
-    throw new KnowledgeError("INVALID_PATH", "Path escapes the knowledge root");
-  }
-  return absolute;
+  return safe === "" ? rootAbs : resolve(rootAbs, ...safe.split("/"));
 }
 
 export function toRootRelative(root: string, absolutePath: string): string {
@@ -49,8 +73,8 @@ export function toRootRelative(root: string, absolutePath: string): string {
   return toPosix(rel);
 }
 
-export function assertMarkdownNote(relativePath: string): void {
-  const posix = assertSafeRelative(relativePath);
+export function assertMarkdownNote(root: string, relativePath: string): void {
+  const posix = toSafeRelative(root, relativePath);
   if (posix === "" || !posix.toLowerCase().endsWith(".md")) {
     throw new KnowledgeError("INVALID_PATH", "Note path must be a .md file inside the knowledge root");
   }

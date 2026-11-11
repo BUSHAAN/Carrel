@@ -18,11 +18,20 @@ describe("path sandbox", () => {
     expect(() => resolveInsideRoot(root, "a/../../secret.md")).toThrow(KnowledgeError);
   });
 
-  it("rejects absolute paths", () => {
+  it("rejects absolute paths outside the knowledge root", () => {
     expect(() => resolveInsideRoot(root, "/tmp/x.md")).toThrow(KnowledgeError);
   });
 
+  it("accepts an absolute path inside the knowledge root", () => {
+    const absolute = resolveInsideRoot(root, join(root, "HPC", "notes.md"));
+    expect(absolute).toBe(resolveInsideRoot(root, "HPC/notes.md"));
+  });
+
+  it("treats the project directory as the knowledge root", () => {
+    expect(resolveInsideRoot(root, join(root, ".."))).toBe(root);
+  });
+
   it("requires markdown notes", () => {
-    expect(() => assertMarkdownNote("notes.txt")).toThrow(/\.md/);
+    expect(() => assertMarkdownNote(root, "notes.txt")).toThrow(/\.md/);
   });
 });

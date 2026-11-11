@@ -46,7 +46,7 @@ export function listFiles(root: string, relativePath: string): FileEntry[] {
 }
 
 export async function readNote(root: string, relativePath: string): Promise<string> {
-  assertMarkdownNote(relativePath);
+  assertMarkdownNote(root, relativePath);
   const absolute = resolveInsideRoot(root, relativePath);
   if (!existsSync(absolute) || !statSync(absolute).isFile()) {
     throw new KnowledgeError("NOT_FOUND", `Note not found: ${relativePath}`);
@@ -55,7 +55,7 @@ export async function readNote(root: string, relativePath: string): Promise<stri
 }
 
 export function createFolder(root: string, relativePath: string): void {
-  const safe = assertSafeRelative(relativePath);
+  const safe = assertSafeRelative(root, relativePath);
   if (safe === "") {
     throw new KnowledgeError("INVALID_PATH", "Folder path is required");
   }
@@ -85,7 +85,7 @@ export function atomicWriteFile(absolute: string, content: string): void {
 }
 
 export async function createNote(root: string, relativePath: string, content: string): Promise<void> {
-  assertMarkdownNote(relativePath);
+  assertMarkdownNote(root, relativePath);
   const absolute = resolveInsideRoot(root, relativePath);
   if (existsSync(absolute)) {
     throw new KnowledgeError("ALREADY_EXISTS", `Note already exists: ${relativePath}`);
@@ -94,7 +94,7 @@ export async function createNote(root: string, relativePath: string, content: st
 }
 
 export async function updateNote(root: string, relativePath: string, content: string): Promise<void> {
-  assertMarkdownNote(relativePath);
+  assertMarkdownNote(root, relativePath);
   const absolute = resolveInsideRoot(root, relativePath);
   if (!existsSync(absolute)) {
     throw new KnowledgeError("NOT_FOUND", `Note not found: ${relativePath}`);
@@ -115,8 +115,8 @@ export async function updateSection(root: string, relativePath: string, heading:
 }
 
 export async function moveNote(root: string, from: string, to: string): Promise<void> {
-  assertMarkdownNote(from);
-  assertMarkdownNote(to);
+  assertMarkdownNote(root, from);
+  assertMarkdownNote(root, to);
   const source = resolveInsideRoot(root, from);
   const dest = resolveInsideRoot(root, to);
   if (!existsSync(source)) {
@@ -130,7 +130,7 @@ export async function moveNote(root: string, from: string, to: string): Promise<
 }
 
 export async function deleteNote(root: string, relativePath: string, confirm: boolean): Promise<void> {
-  assertMarkdownNote(relativePath);
+  assertMarkdownNote(root, relativePath);
   if (!confirm) {
     throw new KnowledgeError(
       "CONFIRM_REQUIRED",
