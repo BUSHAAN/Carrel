@@ -38,7 +38,7 @@ export function splitSections(markdown: string): MarkdownSection[] {
   return sections;
 }
 
-function findSection(markdown: string, heading: string): MarkdownSection | undefined {
+export function findSection(markdown: string, heading: string): MarkdownSection | undefined {
   const wanted = heading.trim().toLowerCase();
   return splitSections(markdown).find((section) => section.heading.toLowerCase() === wanted);
 }
@@ -77,6 +77,18 @@ export function appendText(markdown: string, content: string, heading?: string):
   const before = markdown.slice(0, section.end).replace(/\s*$/u, "");
   const after = markdown.slice(section.end);
   return `${before}\n\n${chunk}\n${after}`;
+}
+
+export function readSection(markdown: string, heading: string): string {
+  const section = findSection(markdown, heading);
+  if (!section) {
+    throw new KnowledgeError("SECTION_NOT_FOUND", `No heading matching "${heading}"`);
+  }
+  return markdown.slice(section.start, section.end).trim();
+}
+
+export function noteOutline(markdown: string): { heading: string; level: number }[] {
+  return splitSections(markdown).map((section) => ({ heading: section.heading, level: section.level }));
 }
 
 export function extractHeadingSnippets(markdown: string): { heading: string; text: string }[] {

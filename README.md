@@ -67,20 +67,13 @@ See [cloudflare/config.yml.example](cloudflare/config.yml.example) if you use `c
 
 ## Tools
 
-| Tool | Purpose |
-| --- | --- |
-| `list_folders` | Explore the knowledge base |
-| `list_files` | List notes in a folder |
-| `read_note` | Read a Markdown note |
-| `create_note` | Create a note (fails if it exists) |
-| `update_note` | Replace a note |
-| `append_to_note` | Add material without wiping the file |
-| `update_section` | Replace one heading section |
-| `search_notes` | Full-text search |
-| `move_note` | Rename or move a note |
-| `create_folder` | Add subject/topic folders |
-| `delete_note` | Delete with `confirm: true` |
-| `get_study_index` | Subject overview from README files |
+Edits snapshot the previous file under `knowledge/.study-mcp/versions/`. Study status lives in `knowledge/.study-mcp/study-progress.json`.
+
+Filesystem: `list_folders`, `list_files`, `read_note`, `read_section`, `get_note_metadata`, `create_note`, `update_note`, `append_to_note`, `update_section`, `batch_read_notes`, `batch_update_notes`, `get_recent_changes`, `move_note`, `create_folder`, `delete_note`, `get_note_version`, `restore_note_version`, `get_file_diff`.
+
+Knowledge: `search_notes`, `get_study_index`, `get_vault_overview`, `get_note_outline`, `get_backlinks`, `validate_links`.
+
+Study: `get_study_progress`, `update_topic_status`, `add_revision_item`, `get_revision_queue`, `record_study_session`.
 
 ## Tests
 
